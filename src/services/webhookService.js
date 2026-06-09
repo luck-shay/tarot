@@ -100,7 +100,9 @@ export const processPaymentCapturedWebhook = async (eventBody) => {
     razorpayPaymentId: paymentEntity.id,
     amountPaid,
   });
-
+logger.info("About to send owner WhatsApp", {
+  bookingId: updatedBooking.id,
+});
   try {
   await sendOwnerWhatsappNotification({
     booking: updatedBooking,
@@ -109,6 +111,7 @@ export const processPaymentCapturedWebhook = async (eventBody) => {
 } catch (error) {
   logger.error("Owner WhatsApp failed", error);
 }
+logger.info("Owner WhatsApp sent successfully");
 
 try {
   await sendCustomerWhatsappConfirmation({
