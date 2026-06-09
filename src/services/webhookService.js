@@ -7,7 +7,6 @@ import {
   sendOwnerWhatsappNotification,
   sendCustomerWhatsappConfirmation,
 } from "./whatsappService.js";
-import { sendOwnerWhatsappNotification } from "./whatsappService.js";
 
 const extractBookingIdFromPaymentEntity = (paymentEntity) => {
   if (paymentEntity?.notes?.booking_id) {
