@@ -52,7 +52,14 @@ export const processPaymentCapturedWebhook = async (eventBody) => {
   });
 
   const service = await getServiceById(updatedBooking.service_id);
-  await sendOwnerPaymentNotification({ booking: updatedBooking, service });
+  const emailSent = await sendOwnerPaymentNotification({ booking: updatedBooking, service });
+
+  if (!emailSent) {
+    logger.warn("Payment notification email was not sent", {
+      bookingId,
+      razorpayPaymentId: paymentEntity.id,
+    });
+  }
 
   logger.info("Booking marked paid from webhook", {
     bookingId,

@@ -2,9 +2,16 @@ import crypto from "crypto";
 import { razorpayClient } from "../config/razorpayClient.js";
 import { env } from "../config/env.js";
 import { AppError } from "../utils/appError.js";
+import { logger } from "../utils/logger.js";
 
 export const createPaymentLinkForBooking = async ({ booking, service }) => {
-  const amountInPaise = Number(service.price) * 100;
+  const amountInRupees = Number(service.price);
+
+  if (!Number.isFinite(amountInRupees) || amountInRupees <= 0) {
+    throw new AppError("Invalid service price", 500);
+  }
+
+  const amountInPaise = Math.round(amountInRupees * 100);
 
   const paymentLinkPayload = {
     amount: amountInPaise,
@@ -27,32 +34,42 @@ export const createPaymentLinkForBooking = async ({ booking, service }) => {
     },
   };
 
-  const paymentLink = await razorpayClient.paymentLink.create(paymentLinkPayload);
+  try {
+    const paymentLink = await razorpayClient.paymentLink.create(paymentLinkPayload);
 
-  return {
-    id: paymentLink.id,
-    shortUrl: paymentLink.short_url,
-  };
+    return {
+      id: paymentLink.id,
+      shortUrl: paymentLink.short_url,
+    };
+  } catch (error) {
+    logger.error("Failed to create Razorpay payment link", {
+      bookingId: booking.id,
+      message: error.message,
+    });
+    throw new AppError("Failed to create Razorpay payment link", 502, error.message);
+  }
 };
 
 export const verifyRazorpayWebhookSignature = (rawBody, signature) => {
-  if (!env.RAZORPAY_WEBHOOK_SECRET) {
-    throw new AppError(
-      "Webhook secret missing. Set RAZORPAY_WEBHOOK_SECRET in environment.",
-      500,
-    );
+  const webhookSecret = env.RAZORPAY_WEBHOOK_SECRET || env.RAZORPAY_KEY_SECRET;
+
+  if (!webhookSecret) {
+    throw new AppError("Webhook secret missing. Set RAZORPAY_WEBHOOK_SECRET in environment.", 500);
   }
 
   if (!signature) {
     throw new AppError("Missing Razorpay signature header", 400);
   }
 
+  const rawBuffer = Buffer.isBuffer(rawBody) ? rawBody : Buffer.from(rawBody ?? "");
+  const providedSignature = Array.isArray(signature) ? signature[0] : signature;
+
   const expectedSignature = crypto
-    .createHmac("sha256", env.RAZORPAY_WEBHOOK_SECRET)
-    .update(rawBody)
+    .createHmac("sha256", webhookSecret)
+    .update(rawBuffer)
     .digest("hex");
 
-  const signatureBuffer = Buffer.from(signature, "utf8");
+  const signatureBuffer = Buffer.from(providedSignature, "utf8");
   const expectedBuffer = Buffer.from(expectedSignature, "utf8");
 
   if (
