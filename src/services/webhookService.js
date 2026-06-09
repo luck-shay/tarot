@@ -69,6 +69,11 @@ const assertPaymentMatchesBooking = ({ booking, service, paymentEntity, amountPa
 };
 
 export const processPaymentCapturedWebhook = async (eventBody) => {
+  logger.info("[TRACE webhook] entering processPaymentCapturedWebhook", {
+    event: eventBody?.event,
+    paymentId: eventBody?.payload?.payment?.entity?.id,
+  });
+
   const paymentEntity = eventBody?.payload?.payment?.entity;
 
   if (!paymentEntity) {
@@ -95,15 +100,35 @@ export const processPaymentCapturedWebhook = async (eventBody) => {
     return booking;
   }
 
+  logger.info("[TRACE webhook] before markBookingPaid", {
+    bookingId,
+    razorpayPaymentId: paymentEntity.id,
+    amountPaid,
+  });
+
   const updatedBooking = await markBookingPaid({
     bookingId,
     razorpayPaymentId: paymentEntity.id,
     amountPaid,
   });
+
+  logger.info("[TRACE webhook] after markBookingPaid", {
+    bookingId: updatedBooking.id,
+    paymentStatus: updatedBooking.payment_status,
+    bookingStatus: updatedBooking.booking_status,
+  });
+
   try {
+    logger.info("[TRACE webhook] before owner WhatsApp", {
+      bookingId: updatedBooking.id,
+      ownerWhatsappConfigured: Boolean(process.env.OWNER_WHATSAPP_NUMBER),
+    });
     await sendOwnerWhatsappNotification({
       booking: updatedBooking,
       service,
+    });
+    logger.info("[TRACE webhook] after owner WhatsApp", {
+      bookingId: updatedBooking.id,
     });
   } catch (error) {
     logger.error("Owner WhatsApp failed", {
@@ -112,20 +137,33 @@ export const processPaymentCapturedWebhook = async (eventBody) => {
     });
   }
 
-  logger.info("Owner WhatsApp sent successfully", {
+  try {
+    logger.info("[TRACE webhook] before customer WhatsApp", {
+      bookingId: updatedBooking.id,
+      customerPhone: updatedBooking.customer_phone,
+    });
+    await sendCustomerWhatsappConfirmation({
+      booking: updatedBooking,
+      service,
+    });
+    logger.info("[TRACE webhook] after customer WhatsApp", {
+      bookingId: updatedBooking.id,
+    });
+  } catch (error) {
+    logger.error("Customer WhatsApp failed", {
+      message: error.message,
+      stack: error.stack,
+    });
+  }
+
+  logger.info("[TRACE webhook] before email", {
     bookingId: updatedBooking.id,
   });
-
-try {
-  await sendCustomerWhatsappConfirmation({
-    booking: updatedBooking,
-    service,
-  });
-} catch (error) {
-  logger.error("Customer WhatsApp failed", error);
-}
-
   const emailSent = await sendOwnerPaymentNotification({ booking: updatedBooking, service });
+  logger.info("[TRACE webhook] after email", {
+    bookingId: updatedBooking.id,
+    emailSent,
+  });
 
   if (!emailSent) {
     logger.warn("Payment notification email was not sent", {

@@ -7,40 +7,66 @@ const sendWhatsAppMessage = async (payload) => {
   logger.info("Sending WhatsApp message", {
     to: payload.to,
     type: payload.type,
+    phoneNumberIdConfigured: Boolean(process.env.WHATSAPP_PHONE_NUMBER_ID),
+    accessTokenConfigured: Boolean(process.env.WHATSAPP_ACCESS_TOKEN),
   });
 
-  const response = await fetch(
-    `https://graph.facebook.com/${GRAPH_VERSION}/${process.env.WHATSAPP_PHONE_NUMBER_ID}/messages`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${process.env.WHATSAPP_ACCESS_TOKEN}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
+  try {
+    const response = await fetch(
+      `https://graph.facebook.com/${GRAPH_VERSION}/${process.env.WHATSAPP_PHONE_NUMBER_ID}/messages`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${process.env.WHATSAPP_ACCESS_TOKEN}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      }
+    );
+
+    const responseBody = await response.text();
+    let data;
+
+    try {
+      data = responseBody ? JSON.parse(responseBody) : null;
+    } catch {
+      data = responseBody;
     }
-  );
 
-  const data = await response.json();
-
-  if (!response.ok) {
-    logger.error("WhatsApp send failed", {
+    logger.info("WhatsApp API response", {
       to: payload.to,
       status: response.status,
-      error: data,
+      ok: response.ok,
+      body: data,
     });
 
-    throw new Error(
-      `WhatsApp API Error: ${JSON.stringify(data)}`
-    );
+    if (!response.ok) {
+      logger.error("WhatsApp send failed", {
+        to: payload.to,
+        status: response.status,
+        body: data,
+      });
+
+      throw new Error(
+        `WhatsApp API Error: ${JSON.stringify(data)}`
+      );
+    }
+
+    logger.info("WhatsApp message sent", {
+      to: payload.to,
+      messageId: data?.messages?.[0]?.id,
+    });
+
+    return data;
+  } catch (error) {
+    logger.error("WhatsApp request threw", {
+      to: payload.to,
+      message: error.message,
+      stack: error.stack,
+    });
+
+    throw error;
   }
-
-  logger.info("WhatsApp message sent", {
-    to: payload.to,
-    messageId: data?.messages?.[0]?.id,
-  });
-
-  return data;
 };
 
 export const sendOwnerWhatsappNotification = async ({
