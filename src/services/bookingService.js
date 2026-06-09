@@ -25,9 +25,15 @@ export const createBookingWithPaymentLink = async (payload) => {
     .select(bookingSelectFields)
     .single();
 
-  if (insertError || !booking) {
-    throw new AppError("Failed to create booking", 500, insertError?.message);
-  }
+if (insertError || !booking) {
+  console.error("BOOKING INSERT ERROR:", insertError);
+
+  throw new AppError(
+    "Failed to create booking",
+    500,
+    JSON.stringify(insertError)
+  );
+}
 
   logger.info("Booking created", {
     bookingId: booking.id,
