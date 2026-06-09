@@ -1,8 +1,14 @@
 // src/services/whatsappService.js
+import { logger } from "../utils/logger.js";
 
 const GRAPH_VERSION = "v25.0";
 
 const sendWhatsAppMessage = async (payload) => {
+  logger.info("Sending WhatsApp message", {
+    to: payload.to,
+    type: payload.type,
+  });
+
   const response = await fetch(
     `https://graph.facebook.com/${GRAPH_VERSION}/${process.env.WHATSAPP_PHONE_NUMBER_ID}/messages`,
     {
@@ -18,10 +24,21 @@ const sendWhatsAppMessage = async (payload) => {
   const data = await response.json();
 
   if (!response.ok) {
+    logger.error("WhatsApp send failed", {
+      to: payload.to,
+      status: response.status,
+      error: data,
+    });
+
     throw new Error(
       `WhatsApp API Error: ${JSON.stringify(data)}`
     );
   }
+
+  logger.info("WhatsApp message sent", {
+    to: payload.to,
+    messageId: data?.messages?.[0]?.id,
+  });
 
   return data;
 };
