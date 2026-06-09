@@ -3,6 +3,11 @@ import { logger } from "../utils/logger.js";
 import { getBookingById, markBookingPaid } from "./bookingService.js";
 import { sendOwnerPaymentNotification } from "./notificationService.js";
 import { getServiceById } from "./serviceCatalogService.js";
+import {
+  sendOwnerWhatsappNotification,
+  sendCustomerWhatsappConfirmation,
+} from "./whatsappService.js";
+import { sendOwnerWhatsappNotification } from "./whatsappService.js";
 
 const extractBookingIdFromPaymentEntity = (paymentEntity) => {
   if (paymentEntity?.notes?.booking_id) {
@@ -96,6 +101,24 @@ export const processPaymentCapturedWebhook = async (eventBody) => {
     razorpayPaymentId: paymentEntity.id,
     amountPaid,
   });
+
+  try {
+  await sendOwnerWhatsappNotification({
+    booking: updatedBooking,
+    service,
+  });
+} catch (error) {
+  logger.error("Owner WhatsApp failed", error);
+}
+
+try {
+  await sendCustomerWhatsappConfirmation({
+    booking: updatedBooking,
+    service,
+  });
+} catch (error) {
+  logger.error("Customer WhatsApp failed", error);
+}
 
   const emailSent = await sendOwnerPaymentNotification({ booking: updatedBooking, service });
 
