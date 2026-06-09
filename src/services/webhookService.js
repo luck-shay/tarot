@@ -111,7 +111,7 @@ export const processPaymentCapturedWebhook = async (eventBody) => {
     razorpayPaymentId: paymentEntity.id,
     amountPaid,
   });
-
+throw new Error("WEBHOOK_REACHED_AFTER_PAYMENT");
   logger.info("[TRACE webhook] after markBookingPaid", {
     bookingId: updatedBooking.id,
     paymentStatus: updatedBooking.payment_status,
