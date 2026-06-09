@@ -42,12 +42,21 @@ export const createPaymentLinkForBooking = async ({ booking, service }) => {
       shortUrl: paymentLink.short_url,
     };
   } catch (error) {
-    logger.error("Failed to create Razorpay payment link", {
-      bookingId: booking.id,
-      message: error.message,
-    });
-    throw new AppError("Failed to create Razorpay payment link", 502, error.message);
-  }
+  console.error("RAZORPAY ERROR:");
+  console.error(error);
+
+  logger.error("Failed to create Razorpay payment link", {
+    bookingId: booking.id,
+    message: error.message,
+    error,
+  });
+
+  throw new AppError(
+    "Failed to create Razorpay payment link",
+    502,
+    JSON.stringify(error?.error || error)
+  );
+}
 };
 
 export const verifyRazorpayWebhookSignature = (rawBody, signature) => {
