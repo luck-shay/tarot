@@ -66,13 +66,13 @@ export const getServiceById = async (serviceId) => {
 			serviceId: normalizedServiceId,
 			message: error.message,
 		});
+
+		const fallbackService = canonicalServices.find((service) => service.id === normalizedServiceId);
+
+		if (fallbackService) {
+			return fallbackService;
+		}
 	}
 
-	const fallbackService = canonicalServices.find((service) => service.id === normalizedServiceId);
-
-	if (!fallbackService) {
-		throw new AppError("Service not found", 404);
-	}
-
-	return fallbackService;
+	throw new AppError("Service not found", 404);
 };

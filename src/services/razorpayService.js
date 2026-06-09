@@ -51,7 +51,7 @@ export const createPaymentLinkForBooking = async ({ booking, service }) => {
 };
 
 export const verifyRazorpayWebhookSignature = (rawBody, signature) => {
-  const webhookSecret = env.RAZORPAY_WEBHOOK_SECRET || env.RAZORPAY_KEY_SECRET;
+  const webhookSecret = env.RAZORPAY_WEBHOOK_SECRET;
 
   if (!webhookSecret) {
     throw new AppError("Webhook secret missing. Set RAZORPAY_WEBHOOK_SECRET in environment.", 500);
