@@ -134,7 +134,7 @@ Thank you for choosing House of Arcana ✨`
 export const sendOwnerWhatsappNotification = async () => {
   return sendWhatsAppMessage({
     messaging_product: "whatsapp",
-    to: "919548457345",
+    to: process.env.OWNER_WHATSAPP_NUMBER,
     type: "template",
     template: {
       name: "hello_world",
