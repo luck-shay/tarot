@@ -69,33 +69,45 @@ const sendWhatsAppMessage = async (payload) => {
   }
 };
 
-export const sendOwnerWhatsappNotification = async ({
-  booking,
-  service,
-}) => {
+// export const sendOwnerWhatsappNotification = async ({
+//   booking,
+//   service,
+// }) => {
+//   return sendWhatsAppMessage({
+//     messaging_product: "whatsapp",
+//     to: process.env.OWNER_WHATSAPP_NUMBER,
+//     // to: booking.customer_phone, // For testing with customer number
+//     type: "text",
+//     text: {
+//       body:
+// `🔮 NEW PAID BOOKING
+
+// Customer: ${booking.customer_name}
+// Phone: ${booking.customer_phone}
+
+// Service: ${service.name}
+// Amount: ₹${service.price}
+
+// Question:
+// ${booking.question_details || "N/A"}
+
+// Booking ID: ${booking.id}`
+//     }
+//   });
+// };
+export const sendOwnerWhatsappNotification = async () => {
   return sendWhatsAppMessage({
     messaging_product: "whatsapp",
     to: process.env.OWNER_WHATSAPP_NUMBER,
-    // to: booking.customer_phone, // For testing with customer number
-    type: "text",
-    text: {
-      body:
-`🔮 NEW PAID BOOKING
-
-Customer: ${booking.customer_name}
-Phone: ${booking.customer_phone}
-
-Service: ${service.name}
-Amount: ₹${service.price}
-
-Question:
-${booking.question_details || "N/A"}
-
-Booking ID: ${booking.id}`
-    }
+    type: "template",
+    template: {
+      name: "hello_world",
+      language: {
+        code: "en_US",
+      },
+    },
   });
 };
-
 export const sendCustomerWhatsappConfirmation = async ({
   booking,
   service,
