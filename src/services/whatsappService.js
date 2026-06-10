@@ -69,65 +69,29 @@ export const sendWhatsAppMessage = async (payload) => {
   }
 };
 
-// export const sendOwnerWhatsappNotification = async ({
-//   booking,
-//   service,
-// }) => {
-//   return sendWhatsAppMessage({
-//     messaging_product: "whatsapp",
-//     to: process.env.OWNER_WHATSAPP_NUMBER,
-//     // to: booking.customer_phone, // For testing with customer number
-//     type: "text",
-//     text: {
-//       body:
-// `🔮 NEW PAID BOOKING
-
-// Customer: ${booking.customer_name}
-// Phone: ${booking.customer_phone}
-
-// Service: ${service.name}
-// Amount: ₹${service.price}
-
-// Question:
-// ${booking.question_details || "N/A"}
-
-// Booking ID: ${booking.id}`
-//     }
-//   });
-// };
-// export const sendOwnerWhatsappNotification = async () => {
-//   return sendWhatsAppMessage({
-//     messaging_product: "whatsapp",
-//     to: process.env.OWNER_WHATSAPP_NUMBER,
-//     type: "template",
-//     template: {
-//       name: "hello_world",
-//       language: {
-//         code: "en_US",
-//       },
-//     },
-//   });
-// };
-export const sendCustomerWhatsappConfirmation = async ({
+export const sendOwnerWhatsappNotification = async ({
   booking,
   service,
 }) => {
   return sendWhatsAppMessage({
     messaging_product: "whatsapp",
-    to: booking.customer_phone,
+    to: process.env.OWNER_WHATSAPP_NUMBER,
+    // to: booking.customer_phone, // For testing with customer number
     type: "text",
     text: {
       body:
-`🔮 House of Arcana
+`🔮 NEW PAID BOOKING
 
-Your payment has been received successfully.
+Customer: ${booking.customer_name}
+Phone: ${booking.customer_phone}
 
 Service: ${service.name}
-Booking ID: ${booking.id}
+Amount: ₹${service.price}
 
-We will contact you shortly on WhatsApp regarding your reading.
+Question:
+${booking.question_details || "N/A"}
 
-Thank you for choosing House of Arcana ✨`
+Booking ID: ${booking.id}`
     }
   });
 };
@@ -144,3 +108,39 @@ export const sendOwnerWhatsappNotification = async () => {
     },
   });
 };
+// export const sendCustomerWhatsappConfirmation = async ({
+//   booking,
+//   service,
+// }) => {
+//   return sendWhatsAppMessage({
+//     messaging_product: "whatsapp",
+//     to: booking.customer_phone,
+//     type: "text",
+//     text: {
+//       body:
+// `🔮 House of Arcana
+
+// Your payment has been received successfully.
+
+// Service: ${service.name}
+// Booking ID: ${booking.id}
+
+// We will contact you shortly on WhatsApp regarding your reading.
+
+// Thank you for choosing House of Arcana ✨`
+//     }
+//   });
+// };
+// export const sendOwnerWhatsappNotification = async () => {
+//   return sendWhatsAppMessage({
+//     messaging_product: "whatsapp",
+//     to: process.env.OWNER_WHATSAPP_NUMBER,
+//     type: "template",
+//     template: {
+//       name: "hello_world",
+//       language: {
+//         code: "en_US",
+//       },
+//     },
+//   });
+// };
