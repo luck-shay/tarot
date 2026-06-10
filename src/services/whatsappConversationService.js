@@ -9,7 +9,28 @@ import { createPaymentLink } from "./paymentService.js";
 export const processIncomingMessage = async ({
   phone,
   text,
-}) => {
+}) => {if (
+  text &&
+  [
+    "reset",
+    "restart",
+    "cancel",
+    "start over",
+  ].includes(text.toLowerCase())
+) {
+  await deleteSession(phone);
+
+  return sendWhatsAppMessage({
+    messaging_product: "whatsapp",
+    to: phone,
+    type: "text",
+    text: {
+      body: `🔮 Session cancelled.
+
+Send any message to start a new booking.`,
+    },
+  });
+}
   console.log("MESSAGE RECEIVED", {
     phone,
     text,
@@ -103,15 +124,30 @@ After payment you'll receive confirmation automatically.`,
   }
 
   if (session.state === "PAYMENT_PENDING") {
-    return sendWhatsAppMessage({
-      messaging_product: "whatsapp",
-      to: phone,
-      type: "text",
-      text: {
-        body: "Your payment is still pending. Please complete the payment link sent earlier.",
-      },
-    });
-  }
+
+  return sendWhatsAppMessage({
+
+    messaging_product: "whatsapp",
+
+    to: phone,
+
+    type: "text",
+
+    text: {
+
+      body: `Your payment is still pending.
+
+Type:
+
+• PAY to receive the payment link again
+
+• CANCEL to start over`,
+
+    },
+
+  });
+
+}
 
   console.log("UNKNOWN STATE", session);
 
