@@ -26,7 +26,10 @@ export const handleWhatsappWebhook = async (req, res) => {
 
     return res.sendStatus(200);
   } catch (error) {
-    console.error(error);
-    return res.sendStatus(500);
-  }
-};
+  console.error("WHATSAPP BOT ERROR", {
+    message: error.message,
+    stack: error.stack,
+  });
+
+  return res.sendStatus(500);
+}};
