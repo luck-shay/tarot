@@ -1,5 +1,7 @@
 import { sendWhatsAppMessage } from "./whatsappService.js";
-import { createPaymentLink } from "./paymentService.js";
+import { createBookingWithPaymentLink, getBookingById } from "./bookingService.js";
+import { createPaymentLinkForBooking } from "./razorpayService.js";
+import { getServiceById } from "./serviceCatalogService.js";
 
 import {
   getSession,
@@ -108,14 +110,16 @@ Reply with a number to continue.`,
   if (session.state === "ASK_QUESTION") {
     console.log("ASK QUESTION");
 
-    const paymentLink =
-      await createPaymentLink(
-        phone,
-        session.selected_service_id
-      );
+    const { bookingId, paymentLink } = await createBookingWithPaymentLink({
+      customer_name: "WhatsApp User",
+      customer_phone: phone,
+      service_id: session.selected_service_id,
+      question_details: text,
+    });
 
     await updateSession(phone, {
       state: "PAYMENT_PENDING",
+      booking_id: bookingId,
     });
 
     return sendWhatsAppMessage({
@@ -143,11 +147,23 @@ Type CANCEL anytime to start over.`,
       text &&
       text.toLowerCase() === "pay"
     ) {
-      const paymentLink =
-        await createPaymentLink(
-          phone,
-          session.selected_service_id
-        );
+      if (!session.booking_id) {
+        return sendWhatsAppMessage({
+          messaging_product: "whatsapp",
+          to: phone,
+          type: "text",
+          text: {
+            body: "Your booking could not be found. Please type CANCEL and start again.",
+          },
+        });
+      }
+
+      const booking = await getBookingById(session.booking_id);
+      const service = await getServiceById(booking.service_id);
+      const { shortUrl: paymentLink } = await createPaymentLinkForBooking({
+        booking,
+        service,
+      });
 
       return sendWhatsAppMessage({
         messaging_product: "whatsapp",

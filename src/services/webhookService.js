@@ -7,6 +7,7 @@ import {
   sendOwnerWhatsappNotification,
   sendCustomerWhatsappConfirmation,
 } from "./whatsappService.js";
+import { deleteSession } from "../repositories/whatsappSessionRepository.js";
 
 const extractBookingIdFromPaymentEntity = (paymentEntity) => {
   if (paymentEntity?.notes?.booking_id) {
@@ -118,37 +119,42 @@ logger.info("[TRACE webhook] after markBookingPaid", {
   bookingStatus: updatedBooking.booking_status,
 });
 
-try {
-  await sendOwnerWhatsappNotification({
-    booking: updatedBooking,
-    service,
-  });
+  let customerWhatsappSent = false;
 
-  logger.info("Owner WhatsApp sent", {
-    bookingId: updatedBooking.id,
-  });
-} catch (error) {
-  logger.error("Owner WhatsApp failed", {
-    bookingId: updatedBooking.id,
-    message: error.message,
-  });
-}
+  try {
+    await sendOwnerWhatsappNotification({
+      booking: updatedBooking,
+      service,
+    });
 
-try {
-  await sendCustomerWhatsappConfirmation({
-    booking: updatedBooking,
-    service,
-  });
+    logger.info("Owner WhatsApp sent", {
+      bookingId: updatedBooking.id,
+    });
+  } catch (error) {
+    logger.error("Owner WhatsApp failed", {
+      bookingId: updatedBooking.id,
+      message: error.message,
+    });
+  }
 
-  logger.info("Customer WhatsApp sent", {
-    bookingId: updatedBooking.id,
-  });
-} catch (error) {
-  logger.error("Customer WhatsApp failed", {
-    bookingId: updatedBooking.id,
-    message: error.message,
-  });
-}
+  try {
+    await sendCustomerWhatsappConfirmation({
+      booking: updatedBooking,
+      service,
+    });
+
+    customerWhatsappSent = true;
+
+    logger.info("Customer WhatsApp sent", {
+      bookingId: updatedBooking.id,
+    });
+  } catch (error) {
+    logger.error("Customer WhatsApp failed", {
+      bookingId: updatedBooking.id,
+      message: error.message,
+    });
+  }
+
   const emailSent = await sendOwnerPaymentNotification({ booking: updatedBooking, service });
   logger.info("[TRACE webhook] after email", {
     bookingId: updatedBooking.id,
@@ -159,6 +165,15 @@ try {
     logger.warn("Payment notification email was not sent", {
       bookingId,
       razorpayPaymentId: paymentEntity.id,
+    });
+  }
+
+  if (customerWhatsappSent) {
+    await deleteSession(updatedBooking.customer_phone);
+
+    logger.info("WhatsApp session deleted after successful payment", {
+      bookingId: updatedBooking.id,
+      customerPhone: updatedBooking.customer_phone,
     });
   }
 
