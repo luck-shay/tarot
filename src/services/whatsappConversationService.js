@@ -1,40 +1,48 @@
 import { sendWhatsAppMessage } from "./whatsappService.js";
+import { createPaymentLink } from "./paymentService.js";
+
 import {
   getSession,
   createSession,
   updateSession,
+  deleteSession,
 } from "../repositories/whatsappSessionRepository.js";
-import { createPaymentLink } from "./paymentService.js";
 
 export const processIncomingMessage = async ({
   phone,
   text,
-}) => {if (
-  text &&
-  [
-    "reset",
-    "restart",
-    "cancel",
-    "start over",
-  ].includes(text.toLowerCase())
-) {
-  await deleteSession(phone);
+}) => {
+  text = text?.trim();
 
-  return sendWhatsAppMessage({
-    messaging_product: "whatsapp",
-    to: phone,
-    type: "text",
-    text: {
-      body: `🔮 Session cancelled.
-
-Send any message to start a new booking.`,
-    },
-  });
-}
   console.log("MESSAGE RECEIVED", {
     phone,
     text,
   });
+
+  if (
+    text &&
+    [
+      "cancel",
+      "reset",
+      "restart",
+      "start over",
+    ].includes(text.toLowerCase())
+  ) {
+    console.log("CANCELLING SESSION", phone);
+
+    await deleteSession(phone);
+
+    return sendWhatsAppMessage({
+      messaging_product: "whatsapp",
+      to: phone,
+      type: "text",
+      text: {
+        body: `🔮 Session cancelled.
+
+Send any message to start a new booking.`,
+      },
+    });
+  }
 
   const session = await getSession(phone);
 
@@ -76,7 +84,8 @@ Reply with a number to continue.`,
         to: phone,
         type: "text",
         text: {
-          body: "Please choose a number between 1 and 6.",
+          body:
+            "Please choose a number between 1 and 6.",
         },
       });
     }
@@ -97,66 +106,87 @@ Reply with a number to continue.`,
   }
 
   if (session.state === "ASK_QUESTION") {
+    console.log("ASK QUESTION");
+
     const paymentLink =
-  await createPaymentLink(
-    phone,
-    session.selected_service_id
-  );
+      await createPaymentLink(
+        phone,
+        session.selected_service_id
+      );
 
-await updateSession(phone, {
-  state: "PAYMENT_PENDING",
-});
+    await updateSession(phone, {
+      state: "PAYMENT_PENDING",
+    });
 
-return sendWhatsAppMessage({
-  messaging_product: "whatsapp",
-  to: phone,
-  type: "text",
-  text: {
-    body: `🔮 Booking Created
+    return sendWhatsAppMessage({
+      messaging_product: "whatsapp",
+      to: phone,
+      type: "text",
+      text: {
+        body: `🔮 Booking Created
 
 Complete payment here:
 
 ${paymentLink}
 
-After payment you'll receive confirmation automatically.`,
-  },
-});
+After payment you'll receive confirmation automatically.
+
+Type CANCEL anytime to start over.`,
+      },
+    });
   }
 
   if (session.state === "PAYMENT_PENDING") {
+    console.log("PAYMENT PENDING");
 
-  return sendWhatsAppMessage({
+    if (
+      text &&
+      text.toLowerCase() === "pay"
+    ) {
+      const paymentLink =
+        await createPaymentLink(
+          phone,
+          session.selected_service_id
+        );
 
-    messaging_product: "whatsapp",
+      return sendWhatsAppMessage({
+        messaging_product: "whatsapp",
+        to: phone,
+        type: "text",
+        text: {
+          body: `Payment link:
 
-    to: phone,
+${paymentLink}`,
+        },
+      });
+    }
 
-    type: "text",
-
-    text: {
-
-      body: `Your payment is still pending.
+    return sendWhatsAppMessage({
+      messaging_product: "whatsapp",
+      to: phone,
+      type: "text",
+      text: {
+        body: `Your payment is still pending.
 
 Type:
 
 • PAY to receive the payment link again
-
 • CANCEL to start over`,
-
-    },
-
-  });
-
-}
+      },
+    });
+  }
 
   console.log("UNKNOWN STATE", session);
+
+  await deleteSession(phone);
 
   return sendWhatsAppMessage({
     messaging_product: "whatsapp",
     to: phone,
     type: "text",
     text: {
-      body: "Something went wrong. Please type hi and try again.",
+      body:
+        "Something went wrong. Session reset. Send any message to start again.",
     },
   });
 };
