@@ -1,3 +1,5 @@
+import { processIncomingMessage } from "../services/whatsappConversationService.js";
+
 export const verifyWhatsappWebhook = (req, res) => {
   const mode = req.query["hub.mode"];
   const token = req.query["hub.verify_token"];
@@ -14,7 +16,28 @@ export const verifyWhatsappWebhook = (req, res) => {
 };
 
 export const handleWhatsappWebhook = async (req, res) => {
-  console.log("WhatsApp webhook received");
+  try {
+    const entry = req.body?.entry?.[0];
+    const change = entry?.changes?.[0];
+    const message = change?.value?.messages?.[0];
 
-  res.sendStatus(200);
+    if (!message) {
+      return res.sendStatus(200);
+    }
+
+    const from = message.from;
+    const text = message.text?.body?.trim();
+
+    console.log("Incoming WhatsApp:", from, text);
+
+    await processIncomingMessage({
+      phone: from,
+      text,
+    });
+
+    res.sendStatus(200);
+  } catch (error) {
+    console.error(error);
+    res.sendStatus(500);
+  }
 };
