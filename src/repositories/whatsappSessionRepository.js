@@ -1,51 +1,26 @@
 import { supabase } from "../config/supabase.js";
 
 export const getSession = async (phone) => {
-  if (error) {
-  console.error(
-    "GET SESSION ERROR",
-    error
-  );
-}
   const { data, error } = await supabase
     .from("whatsapp_sessions")
     .select("*")
     .eq("phone", phone)
     .single();
 
+  if (error) {
+    console.error(
+      "GET SESSION ERROR",
+      error
+    );
+  }
+
   console.log("GET SESSION", {
     phone,
     data,
-    error,
   });
 
   return data;
 };
-
-// export const createSession = async (
-//   phone,
-//   state,
-//   selectedServiceId = null
-// ) => {
-//   const { data, error } = await supabase
-//     .from("whatsapp_sessions")
-//     .upsert({
-//       phone,
-//       state,
-//       selected_service_id: selectedServiceId,
-//     })
-//     .select();
-
-//   console.log("CREATE SESSION", {
-//     phone,
-//     state,
-//     selectedServiceId,
-//     data,
-//     error,
-//   });
-
-//   return data;
-// };
 
 export const createSession = async (
   phone,
@@ -61,18 +36,19 @@ export const createSession = async (
     })
     .select();
 
-  console.log("CREATE SESSION", {
-    phone,
-    state,
-    selectedServiceId,
-  });
-
   if (error) {
     console.error(
       "CREATE SESSION ERROR",
       error
     );
   }
+
+  console.log("CREATE SESSION", {
+    phone,
+    state,
+    selectedServiceId,
+    data,
+  });
 
   return data;
 };
@@ -81,12 +57,6 @@ export const updateSession = async (
   phone,
   updates
 ) => {
-  if (error) {
-  console.error(
-    "GET SESSION ERROR",
-    error
-  );
-}
   const { data, error } = await supabase
     .from("whatsapp_sessions")
     .update({
@@ -96,27 +66,41 @@ export const updateSession = async (
     .eq("phone", phone)
     .select();
 
+  if (error) {
+    console.error(
+      "UPDATE SESSION ERROR",
+      error
+    );
+  }
+
   console.log("UPDATE SESSION", {
     phone,
     updates,
     data,
-    error,
   });
 
   return data;
 };
 
-export const deleteSession = async (phone) => {
+export const deleteSession = async (
+  phone
+) => {
   const { data, error } = await supabase
     .from("whatsapp_sessions")
     .delete()
     .eq("phone", phone)
     .select();
 
+  if (error) {
+    console.error(
+      "DELETE SESSION ERROR",
+      error
+    );
+  }
+
   console.log("DELETE SESSION", {
     phone,
     data,
-    error,
   });
 
   return data;
