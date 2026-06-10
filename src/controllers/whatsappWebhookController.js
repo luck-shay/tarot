@@ -15,29 +15,37 @@ export const verifyWhatsappWebhook = (req, res) => {
   return res.sendStatus(403);
 };
 
+// export const handleWhatsappWebhook = async (req, res) => {
+//   try {
+//     const entry = req.body?.entry?.[0];
+//     const change = entry?.changes?.[0];
+//     const message = change?.value?.messages?.[0];
+
+//     if (!message) {
+//       return res.sendStatus(200);
+//     }
+
+//     const from = message.from;
+//     const text = message.text?.body?.trim();
+
+//     console.log("Incoming WhatsApp:", from, text);
+
+//     await processIncomingMessage({
+//       phone: from,
+//       text,
+//     });
+
+//     res.sendStatus(200);
+//   } catch (error) {
+//     console.error(error);
+//     res.sendStatus(500);
+//   }
+// };
 export const handleWhatsappWebhook = async (req, res) => {
-  try {
-    const entry = req.body?.entry?.[0];
-    const change = entry?.changes?.[0];
-    const message = change?.value?.messages?.[0];
+  console.error(
+    "WHATSAPP_WEBHOOK",
+    JSON.stringify(req.body, null, 2)
+  );
 
-    if (!message) {
-      return res.sendStatus(200);
-    }
-
-    const from = message.from;
-    const text = message.text?.body?.trim();
-
-    console.log("Incoming WhatsApp:", from, text);
-
-    await processIncomingMessage({
-      phone: from,
-      text,
-    });
-
-    res.sendStatus(200);
-  } catch (error) {
-    console.error(error);
-    res.sendStatus(500);
-  }
+  return res.sendStatus(200);
 };
