@@ -95,42 +95,42 @@ Booking ID: ${booking.id}`
     }
   });
 };
-export const sendOwnerWhatsappNotification = async () => {
-  return sendWhatsAppMessage({
-    messaging_product: "whatsapp",
-    to: process.env.OWNER_WHATSAPP_NUMBER,
-    type: "template",
-    template: {
-      name: "hello_world",
-      language: {
-        code: "en_US",
-      },
-    },
-  });
-};
-// export const sendCustomerWhatsappConfirmation = async ({
-//   booking,
-//   service,
-// }) => {
+// export const sendOwnerWhatsappNotification = async () => {
 //   return sendWhatsAppMessage({
 //     messaging_product: "whatsapp",
-//     to: booking.customer_phone,
-//     type: "text",
-//     text: {
-//       body:
-// `🔮 House of Arcana
-
-// Your payment has been received successfully.
-
-// Service: ${service.name}
-// Booking ID: ${booking.id}
-
-// We will contact you shortly on WhatsApp regarding your reading.
-
-// Thank you for choosing House of Arcana ✨`
-//     }
+//     to: process.env.OWNER_WHATSAPP_NUMBER,
+//     type: "template",
+//     template: {
+//       name: "hello_world",
+//       language: {
+//         code: "en_US",
+//       },
+//     },
 //   });
 // };
+export const sendCustomerWhatsappConfirmation = async ({
+  booking,
+  service,
+}) => {
+  return sendWhatsAppMessage({
+    messaging_product: "whatsapp",
+    to: booking.customer_phone,
+    type: "text",
+    text: {
+      body:
+`🔮 House of Arcana
+
+Your payment has been received successfully.
+
+Service: ${service.name}
+Booking ID: ${booking.id}
+
+We will contact you shortly on WhatsApp regarding your reading.
+
+Thank you for choosing House of Arcana ✨`
+    }
+  });
+};
 // export const sendOwnerWhatsappNotification = async () => {
 //   return sendWhatsAppMessage({
 //     messaging_product: "whatsapp",
