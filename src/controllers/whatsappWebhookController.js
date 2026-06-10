@@ -17,12 +17,37 @@ export const verifyWhatsappWebhook = (req, res) => {
 
 export const handleWhatsappWebhook = async (req, res) => {
   try {
-    const message =
+    console.log(
+      "WHATSAPP_WEBHOOK",
+      JSON.stringify(req.body, null, 2)
+    );
+
+    const value =
       req.body?.entry?.[0]
         ?.changes?.[0]
-        ?.value?.messages?.[0];
+        ?.value;
+
+    if (!value) {
+      return res.sendStatus(200);
+    }
+
+    // Ignore delivery/read/status updates
+    if (!value.messages || !Array.isArray(value.messages)) {
+      console.log("Ignoring non-message webhook");
+      return res.sendStatus(200);
+    }
+
+    const message = value.messages[0];
 
     if (!message) {
+      return res.sendStatus(200);
+    }
+
+    console.log("MESSAGE TYPE:", message.type);
+
+    // Only process text messages
+    if (message.type !== "text") {
+      console.log("Ignoring non-text message");
       return res.sendStatus(200);
     }
 
@@ -33,9 +58,7 @@ export const handleWhatsappWebhook = async (req, res) => {
       phone,
       text,
     });
-console.log(
-  JSON.stringify(req.body, null, 2)
-);
+
     await processIncomingMessage({
       phone,
       text,
@@ -43,10 +66,7 @@ console.log(
 
     return res.sendStatus(200);
   } catch (error) {
-    console.error("WHATSAPP BOT ERROR", {
-      message: error.message,
-      stack: error.stack,
-    });
+    console.error("WHATSAPP WEBHOOK ERROR", error);
 
     return res.sendStatus(500);
   }
