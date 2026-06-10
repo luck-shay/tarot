@@ -1,6 +1,12 @@
 import { supabase } from "../config/supabase.js";
 
 export const getSession = async (phone) => {
+  if (error) {
+  console.error(
+    "GET SESSION ERROR",
+    error
+  );
+}
   const { data, error } = await supabase
     .from("whatsapp_sessions")
     .select("*")
@@ -75,6 +81,12 @@ export const updateSession = async (
   phone,
   updates
 ) => {
+  if (error) {
+  console.error(
+    "GET SESSION ERROR",
+    error
+  );
+}
   const { data, error } = await supabase
     .from("whatsapp_sessions")
     .update({
