@@ -1,6 +1,9 @@
 import { sendWhatsAppMessage } from "./whatsappService.js";
-
-const sessions = new Map();
+import {
+  getSession,
+  createSession,
+  updateSession,
+} from "../repositories/whatsappSessionRepository.js";
 
 export const processIncomingMessage = async ({
   phone,
@@ -11,16 +14,17 @@ export const processIncomingMessage = async ({
     text,
   });
 
-  const state = sessions.get(phone);
+  const session = await getSession(phone);
 
-  console.log("CURRENT STATE", state);
+  console.log("CURRENT SESSION", session);
 
-  if (!state) {
+  if (!session) {
     console.log("FIRST MESSAGE");
 
-    sessions.set(phone, {
-      step: "SELECT_SERVICE",
-    });
+    await createSession(
+      phone,
+      "SELECT_SERVICE"
+    );
 
     return sendWhatsAppMessage({
       messaging_product: "whatsapp",
@@ -41,7 +45,7 @@ Reply with a number to continue.`,
     });
   }
 
-  if (state.step === "SELECT_SERVICE") {
+  if (session.state === "SELECT_SERVICE") {
     console.log("SELECT SERVICE");
 
     if (!["1", "2", "3", "4", "5", "6"].includes(text)) {
@@ -55,9 +59,9 @@ Reply with a number to continue.`,
       });
     }
 
-    sessions.set(phone, {
-      step: "ASK_QUESTION",
-      service: text,
+    await updateSession(phone, {
+      state: "ASK_QUESTION",
+      selected_service_id: Number(text),
     });
 
     return sendWhatsAppMessage({
@@ -70,13 +74,11 @@ Reply with a number to continue.`,
     });
   }
 
-  if (state.step === "ASK_QUESTION") {
+  if (session.state === "ASK_QUESTION") {
     console.log("ASK QUESTION");
 
-    sessions.set(phone, {
-      step: "PAYMENT_PENDING",
-      service: state.service,
-      question: text,
+    await updateSession(phone, {
+      state: "PAYMENT_PENDING",
     });
 
     return sendWhatsAppMessage({
@@ -84,15 +86,27 @@ Reply with a number to continue.`,
       to: phone,
       type: "text",
       text: {
-        body: `Question received.
+        body: `🔮 Booking Created
 
-Next step:
-Generate Razorpay payment link here.`,
+Payment link generation coming next.
+
+After payment you'll receive confirmation automatically.`,
       },
     });
   }
 
-  console.log("UNKNOWN STATE", state);
+  if (session.state === "PAYMENT_PENDING") {
+    return sendWhatsAppMessage({
+      messaging_product: "whatsapp",
+      to: phone,
+      type: "text",
+      text: {
+        body: "Your payment is still pending. Please complete the payment link sent earlier.",
+      },
+    });
+  }
+
+  console.log("UNKNOWN STATE", session);
 
   return sendWhatsAppMessage({
     messaging_product: "whatsapp",
