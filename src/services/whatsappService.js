@@ -95,19 +95,19 @@ const sendWhatsAppMessage = async (payload) => {
 //     }
 //   });
 // };
-export const sendOwnerWhatsappNotification = async () => {
-  return sendWhatsAppMessage({
-    messaging_product: "whatsapp",
-    to: process.env.OWNER_WHATSAPP_NUMBER,
-    type: "template",
-    template: {
-      name: "hello_world",
-      language: {
-        code: "en_US",
-      },
-    },
-  });
-};
+// export const sendOwnerWhatsappNotification = async () => {
+//   return sendWhatsAppMessage({
+//     messaging_product: "whatsapp",
+//     to: process.env.OWNER_WHATSAPP_NUMBER,
+//     type: "template",
+//     template: {
+//       name: "hello_world",
+//       language: {
+//         code: "en_US",
+//       },
+//     },
+//   });
+// };
 export const sendCustomerWhatsappConfirmation = async ({
   booking,
   service,

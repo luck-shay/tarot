@@ -106,13 +106,7 @@ export const processPaymentCapturedWebhook = async (eventBody) => {
     amountPaid,
   });
 
-  const updatedBooking = await markBookingPaid({
-    bookingId,
-    razorpayPaymentId: paymentEntity.id,
-    amountPaid,
-  });
-
-  const updatedBooking = await markBookingPaid({
+const updatedBooking = await markBookingPaid({
   bookingId,
   razorpayPaymentId: paymentEntity.id,
   amountPaid,
