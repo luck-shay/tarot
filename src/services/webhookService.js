@@ -111,6 +111,36 @@ export const processPaymentCapturedWebhook = async (eventBody) => {
     razorpayPaymentId: paymentEntity.id,
     amountPaid,
   });
+  logger.error("STEP 1 REACHED");
+
+try {
+  logger.error("STEP 2 BEFORE OWNER WHATSAPP");
+
+  await sendOwnerWhatsappNotification({
+    booking: updatedBooking,
+    service,
+  });
+
+  logger.error("STEP 3 OWNER WHATSAPP SUCCESS");
+} catch (error) {
+  logger.error("STEP 4 OWNER WHATSAPP FAILED", {
+    message: error.message,
+    stack: error.stack,
+  });
+}
+export const sendOwnerWhatsappNotification = async () => {
+  return sendWhatsAppMessage({
+    messaging_product: "whatsapp",
+    to: "919548457345",
+    type: "template",
+    template: {
+      name: "hello_world",
+      language: {
+        code: "en_US",
+      },
+    },
+  });
+};
 // throw new Error("WEBHOOK_REACHED_AFTER_PAYMENT");
   logger.info("[TRACE webhook] after markBookingPaid", {
     bookingId: updatedBooking.id,
