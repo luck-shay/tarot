@@ -73,19 +73,22 @@ export const sendOwnerWhatsappNotification = async ({
   booking,
   service,
 }) => {
-  console.log(
-    "OWNER NUMBER:",
-    process.env.OWNER_WHATSAPP_NUMBER
-  );
+  const rawOwner = String(process.env.OWNER_WHATSAPP_NUMBER || "");
+  let ownerNumber = rawOwner.replace(/\D/g, "");
 
-  console.log(
-    "CUSTOMER NUMBER:",
-    booking.customer_phone
-  );
+  // If owner provided a 10-digit number without country code, assume India (91)
+  if (ownerNumber.length === 10) {
+    ownerNumber = `91${ownerNumber}`;
+  }
+
+  logger.info("Sending owner WhatsApp", {
+    ownerNumberPresent: Boolean(ownerNumber),
+    bookingId: booking?.id,
+  });
 
   return sendWhatsAppMessage({
     messaging_product: "whatsapp",
-    to: process.env.OWNER_WHATSAPP_NUMBER,
+    to: ownerNumber,
     type: "text",
     text: {
       body: `🔮 NEW PAID BOOKING

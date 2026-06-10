@@ -41,6 +41,14 @@ const buildPaymentNotification = ({ booking, service }) => {
 
 export const sendOwnerPaymentNotification = async ({ booking, service }) => {
   const message = buildPaymentNotification({ booking, service });
+  // Allow disabling email notifications via env var without changing call sites
+  if (process.env.DISABLE_EMAIL === "true") {
+    logger.info("Email notifications disabled; skipping sendOwnerPaymentNotification", {
+      bookingId: booking.id,
+    });
+
+    return true;
+  }
 
   try {
     await transporter.sendMail({
