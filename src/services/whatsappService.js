@@ -73,6 +73,10 @@ export const sendOwnerWhatsappNotification = async ({
   booking,
   service,
 }) => {
+  console.log(
+  "OWNER NUMBER:",
+  process.env.OWNER_WHATSAPP_NUMBER
+);
   return sendWhatsAppMessage({
     messaging_product: "whatsapp",
     to: process.env.OWNER_WHATSAPP_NUMBER,
