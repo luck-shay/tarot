@@ -1,14 +1,24 @@
-// src/services/whatsappConversationService.js
-
 import { sendWhatsAppMessage } from "./whatsappService.js";
 
 export const processIncomingMessage = async ({
   phone,
   text,
 }) => {
-  console.log("User said:", text);
 
-  await sendWhatsAppMessage({
+  if (
+    ["1", "2", "3", "4", "5", "6"].includes(text)
+  ) {
+    return sendWhatsAppMessage({
+      messaging_product: "whatsapp",
+      to: phone,
+      type: "text",
+      text: {
+        body: "🔮 Please type your question.",
+      },
+    });
+  }
+
+  return sendWhatsAppMessage({
     messaging_product: "whatsapp",
     to: phone,
     type: "text",
