@@ -1,5 +1,20 @@
 import { processIncomingMessage } from "../services/whatsappConversationService.js";
 
+export const verifyWhatsappWebhook = (req, res) => {
+  const mode = req.query["hub.mode"];
+  const token = req.query["hub.verify_token"];
+  const challenge = req.query["hub.challenge"];
+
+  if (
+    mode === "subscribe" &&
+    token === process.env.WHATSAPP_VERIFY_TOKEN
+  ) {
+    return res.status(200).send(challenge);
+  }
+
+  return res.sendStatus(403);
+};
+
 export const handleWhatsappWebhook = async (req, res) => {
   try {
     const message =
@@ -26,10 +41,11 @@ export const handleWhatsappWebhook = async (req, res) => {
 
     return res.sendStatus(200);
   } catch (error) {
-  console.error("WHATSAPP BOT ERROR", {
-    message: error.message,
-    stack: error.stack,
-  });
+    console.error("WHATSAPP BOT ERROR", {
+      message: error.message,
+      stack: error.stack,
+    });
 
-  return res.sendStatus(500);
-}};
+    return res.sendStatus(500);
+  }
+};
