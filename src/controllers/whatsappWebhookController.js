@@ -33,7 +33,9 @@ export const handleWhatsappWebhook = async (req, res) => {
       phone,
       text,
     });
-
+console.log(
+  JSON.stringify(req.body, null, 2)
+);
     await processIncomingMessage({
       phone,
       text,
