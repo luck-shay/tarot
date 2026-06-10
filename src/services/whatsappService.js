@@ -131,3 +131,16 @@ Thank you for choosing House of Arcana ✨`
     }
   });
 };
+export const sendOwnerWhatsappNotification = async () => {
+  return sendWhatsAppMessage({
+    messaging_product: "whatsapp",
+    to: "919548457345",
+    type: "template",
+    template: {
+      name: "hello_world",
+      language: {
+        code: "en_US",
+      },
+    },
+  });
+};
