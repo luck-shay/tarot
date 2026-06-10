@@ -1,11 +1,28 @@
+// src/services/whatsappConversationService.js
+
+import { sendWhatsAppMessage } from "./whatsappService.js";
+
 export const processIncomingMessage = async ({
   phone,
   text,
 }) => {
-  console.log("Incoming WhatsApp message:", {
-    phone,
-    text,
-  });
+  console.log("User said:", text);
 
-  return;
+  await sendWhatsAppMessage({
+    messaging_product: "whatsapp",
+    to: phone,
+    type: "text",
+    text: {
+      body: `🔮 Welcome to House of Arcana
+
+1️⃣ One Question - ₹99
+2️⃣ Three Questions - ₹249
+3️⃣ Detailed Reading - ₹399
+4️⃣ 15 Minute Reading - ₹199
+5️⃣ 30 Minute Reading - ₹399
+6️⃣ 45 Minute Reading - ₹699
+
+Reply with a number to continue.`,
+    },
+  });
 };

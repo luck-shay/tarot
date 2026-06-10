@@ -3,7 +3,7 @@ import { logger } from "../utils/logger.js";
 
 const GRAPH_VERSION = "v25.0";
 
-const sendWhatsAppMessage = async (payload) => {
+export const sendWhatsAppMessage = async (payload) => {
   logger.info("Sending WhatsApp message", {
     to: payload.to,
     type: payload.type,
