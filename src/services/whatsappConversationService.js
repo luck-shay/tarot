@@ -4,6 +4,7 @@ import {
   createSession,
   updateSession,
 } from "../repositories/whatsappSessionRepository.js";
+import { createPaymentLink } from "./paymentService.js";
 
 export const processIncomingMessage = async ({
   phone,
@@ -75,24 +76,30 @@ Reply with a number to continue.`,
   }
 
   if (session.state === "ASK_QUESTION") {
-    console.log("ASK QUESTION");
+    const paymentLink =
+  await createPaymentLink(
+    phone,
+    session.selected_service_id
+  );
 
-    await updateSession(phone, {
-      state: "PAYMENT_PENDING",
-    });
+await updateSession(phone, {
+  state: "PAYMENT_PENDING",
+});
 
-    return sendWhatsAppMessage({
-      messaging_product: "whatsapp",
-      to: phone,
-      type: "text",
-      text: {
-        body: `🔮 Booking Created
+return sendWhatsAppMessage({
+  messaging_product: "whatsapp",
+  to: phone,
+  type: "text",
+  text: {
+    body: `🔮 Booking Created
 
-Payment link generation coming next.
+Complete payment here:
+
+${paymentLink}
 
 After payment you'll receive confirmation automatically.`,
-      },
-    });
+  },
+});
   }
 
   if (session.state === "PAYMENT_PENDING") {
