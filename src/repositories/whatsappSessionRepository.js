@@ -7,12 +7,15 @@ export const getSession = async (phone) => {
     .eq("phone", phone)
     .single();
 
-  if (error) {
-    console.error(
-      "GET SESSION ERROR",
-      error
-    );
-  }
+  if (
+  error &&
+  error.code !== "PGRST116"
+) {
+  console.error(
+    "GET SESSION ERROR",
+    error
+  );
+}
 
   console.log("GET SESSION", {
     phone,
