@@ -74,17 +74,21 @@ export const sendOwnerWhatsappNotification = async ({
   service,
 }) => {
   console.log(
-  "OWNER NUMBER:",
-  process.env.OWNER_WHATSAPP_NUMBER
-);
+    "OWNER NUMBER:",
+    process.env.OWNER_WHATSAPP_NUMBER
+  );
+
+  console.log(
+    "CUSTOMER NUMBER:",
+    booking.customer_phone
+  );
+
   return sendWhatsAppMessage({
     messaging_product: "whatsapp",
     to: process.env.OWNER_WHATSAPP_NUMBER,
-    // to: booking.customer_phone, // For testing with customer number
     type: "text",
     text: {
-      body:
-`🔮 NEW PAID BOOKING
+      body: `🔮 NEW PAID BOOKING
 
 Customer: ${booking.customer_name}
 Phone: ${booking.customer_phone}
@@ -95,10 +99,46 @@ Amount: ₹${service.price}
 Question:
 ${booking.question_details || "N/A"}
 
-Booking ID: ${booking.id}`
-    }
+Booking ID: ${booking.id}`,
+    },
   });
 };
+
+// export const sendOwnerWhatsappNotification = async ({
+//   booking,
+//   service,
+// }) => {
+//   console.log(
+//   "OWNER NUMBER:",
+//   process.env.OWNER_WHATSAPP_NUMBER
+// );
+
+// console.log(
+//   "BOOKING PHONE:",
+//   booking.customer_phone
+// );
+//   return sendWhatsAppMessage({
+//     messaging_product: "whatsapp",
+//     to: process.env.OWNER_WHATSAPP_NUMBER,
+//     // to: booking.customer_phone, // For testing with customer number
+//     type: "text",
+//     text: {
+//       body:
+// `🔮 NEW PAID BOOKING
+
+// Customer: ${booking.customer_name}
+// Phone: ${booking.customer_phone}
+
+// Service: ${service.name}
+// Amount: ₹${service.price}
+
+// Question:
+// ${booking.question_details || "N/A"}
+
+// Booking ID: ${booking.id}`
+//     }
+//   });
+// };
 // export const sendOwnerWhatsappNotification = async () => {
 //   return sendWhatsAppMessage({
 //     messaging_product: "whatsapp",
