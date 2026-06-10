@@ -12,10 +12,6 @@ const app = express();
 
 app.disable("x-powered-by");
 app.use(cors());
-app.use("/api/webhooks", webhookRoutes);
-app.use("/api/webhooks/whatsapp", whatsappWebhookRoutes);
-app.use("/api", apiRoutes);
-// Keep a copy of the raw request body so Razorpay webhook signatures can be verified.
 app.use(
 	express.json({
 		limit: "1mb",
@@ -24,11 +20,14 @@ app.use(
 		},
 	}),
 );
-
 app.use(express.urlencoded({ extended: true, limit: "1mb" }));
 
 app.use("/api/webhooks", webhookRoutes);
+app.use("/api/webhooks/whatsapp", whatsappWebhookRoutes);
 app.use("/api", apiRoutes);
+// Keep a copy of the raw request body so Razorpay webhook signatures can be verified.
+
+
 
 app.get("/", getHealth);
 
