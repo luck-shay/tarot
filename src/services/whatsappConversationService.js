@@ -6,9 +6,18 @@ export const processIncomingMessage = async ({
   phone,
   text,
 }) => {
+  console.log("MESSAGE RECEIVED", {
+    phone,
+    text,
+  });
+
   const state = sessions.get(phone);
 
+  console.log("CURRENT STATE", state);
+
   if (!state) {
+    console.log("FIRST MESSAGE");
+
     sessions.set(phone, {
       step: "SELECT_SERVICE",
     });
@@ -33,6 +42,8 @@ Reply with a number to continue.`,
   }
 
   if (state.step === "SELECT_SERVICE") {
+    console.log("SELECT SERVICE");
+
     if (!["1", "2", "3", "4", "5", "6"].includes(text)) {
       return sendWhatsAppMessage({
         messaging_product: "whatsapp",
@@ -60,6 +71,8 @@ Reply with a number to continue.`,
   }
 
   if (state.step === "ASK_QUESTION") {
+    console.log("ASK QUESTION");
+
     sessions.set(phone, {
       step: "PAYMENT_PENDING",
       service: state.service,
@@ -78,4 +91,15 @@ Generate Razorpay payment link here.`,
       },
     });
   }
+
+  console.log("UNKNOWN STATE", state);
+
+  return sendWhatsAppMessage({
+    messaging_product: "whatsapp",
+    to: phone,
+    type: "text",
+    text: {
+      body: "Something went wrong. Please type hi and try again.",
+    },
+  });
 };
