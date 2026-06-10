@@ -16,6 +16,31 @@ export const getSession = async (phone) => {
   return data;
 };
 
+// export const createSession = async (
+//   phone,
+//   state,
+//   selectedServiceId = null
+// ) => {
+//   const { data, error } = await supabase
+//     .from("whatsapp_sessions")
+//     .upsert({
+//       phone,
+//       state,
+//       selected_service_id: selectedServiceId,
+//     })
+//     .select();
+
+//   console.log("CREATE SESSION", {
+//     phone,
+//     state,
+//     selectedServiceId,
+//     data,
+//     error,
+//   });
+
+//   return data;
+// };
+
 export const createSession = async (
   phone,
   state,
@@ -34,9 +59,14 @@ export const createSession = async (
     phone,
     state,
     selectedServiceId,
-    data,
-    error,
   });
+
+  if (error) {
+    console.error(
+      "CREATE SESSION ERROR",
+      error
+    );
+  }
 
   return data;
 };
