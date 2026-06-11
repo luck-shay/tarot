@@ -149,24 +149,25 @@ Send any message to start a new booking.`,
   if (session.state === "ASK_QUESTION") {
     console.log("ASK QUESTION");
 
-    const { bookingId, paymentLink } = await createBookingWithPaymentLink({
-      customer_name: "WhatsApp User",
-      customer_phone: phone,
-      service_id: session.selected_service_id,
-      question_details: text,
-    });
+    try {
+      const { bookingId, paymentLink } = await createBookingWithPaymentLink({
+        customer_name: "WhatsApp User",
+        customer_phone: phone,
+        service_id: session.selected_service_id,
+        question_details: text,
+      });
 
-    await updateSession(phone, {
-      state: "PAYMENT_PENDING",
-      booking_id: bookingId,
-    });
+      await updateSession(phone, {
+        state: "PAYMENT_PENDING",
+        booking_id: bookingId,
+      });
 
-    return sendWhatsAppMessage({
-      messaging_product: "whatsapp",
-      to: phone,
-      type: "text",
-      text: {
-        body: `🔮 Booking Created
+      return sendWhatsAppMessage({
+        messaging_product: "whatsapp",
+        to: phone,
+        type: "text",
+        text: {
+          body: `🔮 Booking Created
 
 Complete payment here:
 
@@ -175,8 +176,19 @@ ${paymentLink}
 After payment you'll receive confirmation automatically.
 
 Type CANCEL anytime to start over.`,
-      },
-    });
+        },
+      });
+    } catch (error) {
+      console.error("ASK_QUESTION ERROR:", error);
+      return sendWhatsAppMessage({
+        messaging_product: "whatsapp",
+        to: phone,
+        type: "text",
+        text: {
+          body: `An error occurred while creating your booking: ${error.message}`,
+        },
+      });
+    }
   }
 
   if (session.state === "PAYMENT_PENDING") {
