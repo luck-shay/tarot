@@ -53,10 +53,18 @@ export const handleWhatsappWebhook = async (req, res) => {
 
     const phone = message.from;
     const text = message.text?.body?.trim();
+    const timestamp = Number(message.timestamp);
+
+    // Ignore messages older than 5 minutes to prevent WhatsApp retry spam
+    if (timestamp && (Date.now() / 1000 - timestamp > 300)) {
+      console.log("Ignoring old message retry from WhatsApp", { phone, text, timestamp });
+      return res.sendStatus(200);
+    }
 
     console.log("Incoming WhatsApp", {
       phone,
       text,
+      timestamp,
     });
 
     await processIncomingMessage({
