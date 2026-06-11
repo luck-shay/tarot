@@ -159,7 +159,7 @@ export const sendCustomerWhatsappConfirmation = async ({
   booking,
   service,
 }) => {
-  return sendWhatsAppMessage({
+  await sendWhatsAppMessage({
     messaging_product: "whatsapp",
     to: booking.customer_phone,
     type: "text",
@@ -172,9 +172,34 @@ Your payment has been received successfully.
 Service: ${service.name}
 Booking ID: ${booking.id}
 
-We will contact you shortly on WhatsApp regarding your reading.
+We will contact you shortly on WhatsApp regarding your reading.`
+    }
+  });
 
-Thank you for choosing House of Arcana ✨`
+  return sendWhatsAppMessage({
+    messaging_product: "whatsapp",
+    to: booking.customer_phone,
+    type: "text",
+    text: {
+      body:
+`💗 BEFORE YOUR TAROT SESSION 💗
+
+🪄 Please keep your questions ready before the session.
+
+🧼 Wash your hands and take a moment to relax.
+
+🌙 Find a quiet space where no one can disturb you.
+
+✨ Stay calm, open-minded, and positive throughout the reading.
+
+💫 Try not to see me as a friend, relative, or someone you know. Allow me to guide you objectively and honestly for your highest good.
+
+🔮 Every message that comes through is meant to bring clarity, guidance, and self-awareness.
+
+🌹 By the end of our session, you will leave with a calmer mind, deeper insight, and greater clarity about your situation.
+
+💌 Thank you for trusting House of Arcana.
+@themystiicmirror`
     }
   });
 };
