@@ -169,9 +169,14 @@ logger.info("[TRACE webhook] after markBookingPaid", {
   }
 
   if (customerWhatsappSent) {
-    await deleteSession(updatedBooking.customer_phone);
+    // Instead of deleting the session (which triggers the welcome menu again on next message),
+    // we mark it as COMPLETED so the automated bot ignores further messages.
+    const { updateSession } = await import("../repositories/whatsappSessionRepository.js");
+    await updateSession(updatedBooking.customer_phone, {
+      state: "COMPLETED"
+    });
 
-    logger.info("WhatsApp session deleted after successful payment", {
+    logger.info("WhatsApp session marked as COMPLETED after successful payment", {
       bookingId: updatedBooking.id,
       customerPhone: updatedBooking.customer_phone,
     });

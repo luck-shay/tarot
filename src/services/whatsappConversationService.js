@@ -231,6 +231,12 @@ Type:
     });
   }
 
+  if (session.state === "COMPLETED") {
+    console.log("SESSION COMPLETED - IGNORING MESSAGE FOR HUMAN TAKEOVER");
+    // Do nothing. The automated flow is over.
+    return;
+  }
+
   console.log("UNKNOWN STATE", session);
 
   await deleteSession(phone);
