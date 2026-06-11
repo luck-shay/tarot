@@ -141,7 +141,7 @@ Send any message to start a new booking.`,
       to: phone,
       type: "text",
       text: {
-        body: "🔮 Let us know what would you like to talk about.",
+        body: "🔮 Let us know what you would like to talk about.",
       },
     });
   }
