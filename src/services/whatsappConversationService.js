@@ -106,17 +106,26 @@ Reply with a number to continue.`,
   if (session.state === "SELECT_SERVICE") {
     console.log("SELECT SERVICE");
 
-    selected_service_id: selectedService
+    const selectedService = Number(text);
 
-if (
-  Number.isNaN(selectedService) ||
-  selectedService < 1 ||
-  selectedService > 17
-)
+    if (
+      Number.isNaN(selectedService) ||
+      selectedService < 1 ||
+      selectedService > 17
+    ) {
+      return sendWhatsAppMessage({
+        messaging_product: "whatsapp",
+        to: phone,
+        type: "text",
+        text: {
+          body: "Please choose a number between 1 and 17.",
+        },
+      });
+    }
 
     await updateSession(phone, {
       state: "ASK_QUESTION",
-      selected_service_id: Number(text),
+      selected_service_id: selectedService,
     });
 
     return sendWhatsAppMessage({
