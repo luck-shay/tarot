@@ -73,7 +73,7 @@ export const sendOwnerWhatsappNotification = async ({
   booking,
   service,
 }) => {
-  const rawOwner = String(process.env.OWNER_WHATSAPP_NUMBER || "");
+  const rawOwner = String(process.env.OWNER_WHATSAPP_NUMBER);
   let ownerNumber = rawOwner.replace(/\D/g, "");
 
   // If owner provided a 10-digit number without country code, assume India (91)
