@@ -86,23 +86,30 @@ export const sendOwnerWhatsappNotification = async ({
     bookingId: booking?.id,
   });
 
+  const questionDetails = (booking.question_details || "N/A").substring(0, 1000);
+
   return sendWhatsAppMessage({
     messaging_product: "whatsapp",
     to: ownerNumber,
-    type: "text",
-    text: {
-      body: `🔮 NEW PAID BOOKING
-
-Customer: ${booking.customer_name}
-Phone: ${booking.customer_phone}
-
-Service: ${service.name}
-Amount: ₹${service.price}
-
-Question:
-${booking.question_details || "N/A"}
-
-Booking ID: ${booking.id}`,
+    type: "template",
+    template: {
+      name: "new_booking_alert",
+      language: {
+        code: "en",
+      },
+      components: [
+        {
+          type: "body",
+          parameters: [
+            { type: "text", text: String(booking.customer_name || "User") },
+            { type: "text", text: String(booking.customer_phone) },
+            { type: "text", text: String(service.name) },
+            { type: "text", text: String(service.price) },
+            { type: "text", text: questionDetails },
+            { type: "text", text: String(booking.id) },
+          ],
+        },
+      ],
     },
   });
 };
