@@ -37,4 +37,3 @@ app.use(errorHandler);
 app.listen(env.PORT, () => {
 	logger.info(`Server running on port ${env.PORT}`);
 });
-
